@@ -23,25 +23,3 @@ services:
         sync: false # Set this in Render dashboard
       - key: STRIPE_WEBHOOK_SECRET
         sync: false # Set this in Render dashboard
-<<<<<<< Updated upstream
-
-  # Frontend Static Site
-  - type: static_site
-    name: betting-app-frontend
-    buildCommand: cd frontend && flutter pub get && flutter build web --release
-    publishPath: frontend/build/web
-    headers:
-      - path: /*
-        headers:
-          - key: X-Frame-Options
-            value: DENY
-          - key: X-Content-Type-Options
-            value: nosniff
-
-  # Redis Service (optional - for caching)
-  - type: redis
-    name: betting-app-redis
-    plan: free # or starter for production
-    ipAllowList: [] # Allow all IPs or specify your backend IPs
-=======
->>>>>>> Stashed changes
