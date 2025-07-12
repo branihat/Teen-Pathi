@@ -1,0 +1,10 @@
+{
+  "name": "betting-app-frontend",
+  "version": "1.0.0",
+  "description": "Flutter web build for Render",
+  "scripts": {
+    "build": "bash ./build-frontend.sh"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}
