@@ -3,7 +3,6 @@ services:
   - type: web
     name: betting-app-backend
     env: python
-    repo: https://github.com/yourusername/betting_app.git # Replace with your actual repo
     buildCommand: pip install -r backend/requirements.txt
     startCommand: cd backend && uvicorn main:app --host 0.0.0.0 --port $PORT
     healthCheckPath: /health
@@ -26,10 +25,10 @@ services:
         sync: false # Set this in Render dashboard
 
   # Frontend Static Site
-  - type: static
+  - type: static_site
     name: betting-app-frontend
-    buildCommand: cd frontend && flutter build web
-    staticPublishPath: frontend/build/web
+    buildCommand: cd frontend && flutter pub get && flutter build web --release
+    publishPath: frontend/build/web
     headers:
       - path: /*
         headers:
