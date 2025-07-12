@@ -16,13 +16,14 @@ services:
       - key: DEBUG
         value: "false"
       - key: CORS_ORIGINS
-        value: https://betting-app-frontend.onrender.com # Replace with your frontend URL
+        value: "*" # Will update after frontend deployment
       - key: STRIPE_SECRET_KEY
         sync: false # Set this in Render dashboard
       - key: STRIPE_PUBLISHABLE_KEY
         sync: false # Set this in Render dashboard
       - key: STRIPE_WEBHOOK_SECRET
         sync: false # Set this in Render dashboard
+<<<<<<< Updated upstream
 
   # Frontend Static Site
   - type: static_site
@@ -42,3 +43,5 @@ services:
     name: betting-app-redis
     plan: free # or starter for production
     ipAllowList: [] # Allow all IPs or specify your backend IPs
+=======
+>>>>>>> Stashed changes
