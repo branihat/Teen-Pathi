@@ -1,20 +1,28 @@
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBearer
+from contextlib import asynccontextmanager
 
 from app.core.config import settings
-from app.core.database import engine, Base
+from app.core.database import init_database, close_database
 from app.routers import auth, users, games
 
-# Create database tables
-Base.metadata.create_all(bind=engine)
+# Async context manager for database lifecycle
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup
+    await init_database()
+    yield
+    # Shutdown
+    await close_database()
 
 # Initialize FastAPI app
 app = FastAPI(
     title=settings.APP_NAME,
     version=settings.APP_VERSION,
     description="A comprehensive betting application API",
-    debug=settings.DEBUG
+    debug=settings.DEBUG,
+    lifespan=lifespan
 )
 
 # Add CORS middleware

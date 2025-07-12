@@ -1,21 +1,40 @@
-from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from motor.motor_asyncio import AsyncIOMotorClient
+from beanie import init_beanie
 from .config import settings
+from typing import Optional
 
-# Create database engine
-engine = create_engine(settings.DATABASE_URL)
+# MongoDB client
+client: Optional[AsyncIOMotorClient] = None
 
-# Create SessionLocal class
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+# Get MongoDB client
+async def get_database_client() -> AsyncIOMotorClient:
+    return client
 
-# Create Base class for models
-Base = declarative_base()
+# Initialize database
+async def init_database():
+    global client
+    client = AsyncIOMotorClient(settings.MONGODB_URL)
+    
+    # Import all models here for beanie initialization
+    from app.models.user import User
+    from app.models.bet import Bet
+    from app.models.game import Game
+    from app.models.transaction import Transaction
+    from app.models.notification import Notification
+    
+    # Initialize beanie with the models
+    await init_beanie(
+        database=client[settings.DATABASE_NAME],
+        document_models=[
+            User,
+            Bet,
+            Game,
+            Transaction,
+            Notification
+        ],
+    )
 
-# Dependency to get DB session
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+# Close database connection
+async def close_database():
+    if client:
+        client.close()

@@ -3,13 +3,9 @@ from typing import List, Optional
 import os
 
 class Settings(BaseSettings):
-    # Database
-    DATABASE_URL: str
-    DATABASE_HOST: str = "localhost"
-    DATABASE_PORT: int = 5432
+    # MongoDB Database
+    MONGODB_URL: str
     DATABASE_NAME: str = "betting_db"
-    DATABASE_USER: str = "username"
-    DATABASE_PASSWORD: str = "password"
     
     # Security
     SECRET_KEY: str

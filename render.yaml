@@ -1,0 +1,45 @@
+services:
+  # Backend API Service
+  - type: web
+    name: betting-app-backend
+    env: python
+    repo: https://github.com/yourusername/betting_app.git # Replace with your actual repo
+    buildCommand: pip install -r backend/requirements.txt
+    startCommand: cd backend && uvicorn main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: MONGODB_URL
+        sync: false # Set this in Render dashboard
+      - key: DATABASE_NAME
+        value: betting_db
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "false"
+      - key: CORS_ORIGINS
+        value: https://betting-app-frontend.onrender.com # Replace with your frontend URL
+      - key: STRIPE_SECRET_KEY
+        sync: false # Set this in Render dashboard
+      - key: STRIPE_PUBLISHABLE_KEY
+        sync: false # Set this in Render dashboard
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false # Set this in Render dashboard
+
+  # Frontend Static Site
+  - type: static
+    name: betting-app-frontend
+    buildCommand: cd frontend && flutter build web
+    staticPublishPath: frontend/build/web
+    headers:
+      - path: /*
+        headers:
+          - key: X-Frame-Options
+            value: DENY
+          - key: X-Content-Type-Options
+            value: nosniff
+
+  # Redis Service (optional - for caching)
+  - type: redis
+    name: betting-app-redis
+    plan: free # or starter for production
+    ipAllowList: [] # Allow all IPs or specify your backend IPs

@@ -1,10 +1,11 @@
-from sqlalchemy import Column, Integer, String, Float, DateTime, Enum, Boolean, Text, ForeignKey
-from sqlalchemy.sql import func
-from sqlalchemy.orm import relationship
-from app.core.database import Base
+from beanie import Document, Indexed
+from pydantic import Field
+from datetime import datetime
+from typing import Optional, Dict, Any
+from bson import ObjectId
 import enum
 
-class TransactionType(enum.Enum):
+class TransactionType(str, enum.Enum):
     DEPOSIT = "deposit"
     WITHDRAWAL = "withdrawal"
     BET_PLACED = "bet_placed"
@@ -13,36 +14,40 @@ class TransactionType(enum.Enum):
     BONUS = "bonus"
     COMMISSION = "commission"
 
-class TransactionStatus(enum.Enum):
+class TransactionStatus(str, enum.Enum):
     PENDING = "pending"
     COMPLETED = "completed"
     FAILED = "failed"
     CANCELLED = "cancelled"
 
-class PaymentMethod(enum.Enum):
+class PaymentMethod(str, enum.Enum):
     CREDIT_CARD = "credit_card"
     DEBIT_CARD = "debit_card"
     BANK_TRANSFER = "bank_transfer"
     CRYPTO = "crypto"
     WALLET = "wallet"
 
-class Transaction(Base):
-    __tablename__ = "transactions"
+class Transaction(Document):
+    user_id: ObjectId
+    transaction_type: TransactionType
+    amount: float
+    balance_before: float
+    balance_after: float
+    payment_method: Optional[PaymentMethod] = None
+    status: TransactionStatus = TransactionStatus.PENDING
+    description: Optional[str] = None
+    reference_id: Indexed(Optional[str], unique=True) = None  # External payment reference
+    payment_gateway_response: Optional[Dict[str, Any]] = None  # JSON response from payment gateway
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: Optional[datetime] = None
+    processed_at: Optional[datetime] = None
     
-    id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"))
-    transaction_type = Column(Enum(TransactionType), nullable=False)
-    amount = Column(Float, nullable=False)
-    balance_before = Column(Float, nullable=False)
-    balance_after = Column(Float, nullable=False)
-    payment_method = Column(Enum(PaymentMethod), nullable=True)
-    status = Column(Enum(TransactionStatus), default=TransactionStatus.PENDING)
-    description = Column(String, nullable=True)
-    reference_id = Column(String, unique=True, nullable=True)  # External payment reference
-    payment_gateway_response = Column(Text, nullable=True)  # JSON response from payment gateway
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
-    processed_at = Column(DateTime(timezone=True), nullable=True)
-    
-    # Relationships
-    user = relationship("User", back_populates="transactions")
+    class Settings:
+        name = "transactions"
+        indexes = [
+            "user_id",
+            "transaction_type",
+            "status",
+            "created_at",
+            "reference_id",
+        ]
